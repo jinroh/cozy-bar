@@ -9,9 +9,11 @@
   ],
   "license": "MIT",
   "scripts": {
-    "build": "npm-run-all --parallel 'build:*'",
-    "build:lib": "webpack --config webpack.config.js",
-    "build:min": "NODE_ENV=production webpack --config webpack.config.js",
+    "build": "npm-run-all --parallel 'build:*:*'",
+    "build:browser:lib": "NODE_ENV=browser:development webpack --config webpack.config.js",
+    "build:mobile:lib": "NODE_ENV=mobile:development webpack --config webpack.config.js",
+    "build:browser:min": "NODE_ENV=browser:production webpack --config webpack.config.js",
+    "build:mobile:min": "NODE_ENV=mobile:production webpack --config webpack.config.js",
     "clean": "rm -rf ./dist",
     "lint": "standard 'src/**/*.js'",
     "prebuild": "npm-run-all lint clean",
@@ -47,6 +49,7 @@
     "yaml-loader": "^0.4.0"
   },
   "dependencies": {
+    "extract-text-webpack-plugin": "^1.0.1",
     "jssha": "^2.2.0",
     "node-polyglot": "^2.2.2"
   }

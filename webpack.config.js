@@ -3,14 +3,34 @@
 const path = require('path')
 const webpack = require('webpack')
 const merge = require('webpack-merge')
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-const build = process.env.NODE_ENV === 'production'
+const build = /:production$/.test(process.env.NODE_ENV)
+const target = process.env.NODE_ENV.match(/^(\w+):/)[1]
+
+const plugins = []
+
+const cssloaders = [
+  'css-loader?importLoaders=1',
+  'postcss-loader'
+]
+
+let cssloader
+// standalone library containing styles for mobile
+if (target === 'mobile') {
+  cssloaders = cssloaders.join('!')
+} else {
+  plugins.push(new ExtractTextPlugin('cozy-bar.css'))
+  cssloaders = ExtractTextPlugin.extract(
+    'style-loader', cssloaders.slice(1).join('!')
+  )
+}
 
 const base = {
   entry: path.resolve(__dirname, 'src/'),
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'cozy-bar.js',
+    filename: `cozy-bar.${target}.js`,
     library: 'cozy-bar',
     libraryTarget: 'umd'
   },
@@ -40,25 +60,22 @@ const base = {
       },
       {
         test: /\.(css)$/,
-        loaders: [
-          'style-loader',
-          'css-loader?importLoaders=1',
-          'postcss-loader'
-        ]
+        loader: cssloader
       },
       {
         test: /\.svg$/,
         include: /icons/,
         loader: 'url-loader'
-      }
+      },
     ]
-  }
+  },
+  plugins: plugins
 }
 
 if (build) {
   module.exports = merge(base, {
     output: {
-      filename: 'cozy-bar.min.js',
+      filename: `cozy-bar.${target}.min.js`,
     },
     plugins: [
       new webpack.optimize.DedupePlugin(),
